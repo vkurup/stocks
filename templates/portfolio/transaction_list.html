@@ -1,0 +1,8 @@
+<h2>Transactions</h2>
+<ul>
+  {% for t in object_list %}
+  <li>
+    <a href="{{t.id}}">{{ t.action }}</a> {{t.shares}} {{t.security}} @ {{t.price}} on {{t.date}}
+  </li>
+  {% endfor %}
+</ul>

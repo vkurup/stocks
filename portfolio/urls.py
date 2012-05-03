@@ -1,7 +1,11 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
+from django.views.generic import ListView, DetailView
+from portfolio.models import Transaction
 
 urlpatterns = patterns(
-    'portfolio.views',
-    url(r'^$', 'index'),
-    url(r'^(?P<txn_id>\d+)/$', 'detail'),
+    '',
+    (r'^$', ListView.as_view(
+            model=Transaction)),
+    (r'^(?P<pk>\d+)/$', DetailView.as_view(
+            model=Transaction)),
 )
