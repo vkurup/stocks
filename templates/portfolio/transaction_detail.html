@@ -1,16 +1,41 @@
-<!DOCTYPE html>
+{% extends "portfolio/base.html" %}
 
-<html>
-  <head>
-    <title>Portfolio</title>
-  </head>
+{% block title %}One Transaction{% endblock %}
 
-  <body>
-    <h1>Portfolio: Transaction</h1>
+{% block content %}
 
-    <hr>
+<h2>Portfolio: Transaction</h2>
+<hr>
 
-    {{ transaction }}
+<form action="" method="post">
+  {% csrf_token %}
+  <table>
+    <tr>
+      <th>Action</th>
+      <td><input type="text" name="action" value="{{ transaction.action }}" /></td>
+    </tr>
+    <tr>
+      <th>Date</th>
+      <td><input type="text" name="date" value="{{ transaction.date }}" /></td>
+    </tr>
+    <tr>
+      <th>Security</th>
+      <td><input type="text" name="security" value="{{ transaction.security }}" /></td>
+    </tr>
+    <tr>
+      <th>Shares</th>
+      <td><input type="text" name="shares" value="{{ transaction.shares }}" /></td>
+    </tr>
+    <tr>
+      <th>Price</th>
+      <td><input type="text" name="price" value="{{ transaction.price }}" /></td>
+    </tr>
+    <tr>
+      <th>Commission</th>
+      <td><input type="text" name="commission" value="{{ transaction.commission }}" /></td>
+    </tr>
+  </table>
+  <input type="submit" />
+</form>
 
-  </body>
-</html>
+{% endblock %}

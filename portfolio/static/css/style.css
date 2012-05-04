@@ -34,7 +34,7 @@ html { font-size: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 10
 
 html, button, input, select, textarea { font-family: sans-serif; color: #222; }
 
-body { margin: 0; font-size: 1em; line-height: 1.4; }
+body { margin: 0 auto; font-size: 1em; line-height: 1.4; width: 800px; color: #333; }
 
 /*
  * Remove text-shadow in selection highlight: h5bp.com/i
@@ -291,3 +291,7 @@ td { vertical-align: top; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 }
+
+
+/* VK added */
+td { padding: 15px; }

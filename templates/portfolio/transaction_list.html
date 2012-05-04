@@ -4,13 +4,30 @@
 
 {% block content %}
 
-<h2>Transactions</h2>
-<ul>
+<h2>Portfolio: Transactions</h2>
+<hr>
+
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Action</th>
+    <th>Security</th>
+    <th>Shares</th>
+    <th>Price</th>
+    <th>Commission</th>
+  </tr>
+
   {% for t in object_list %}
-  <li>
-    <a href="{{t.id}}">{{ t.action }}</a> {{t.shares}} {{t.security}} @ {{t.price}} on {{t.date}}
-  </li>
+  <tr>
+    <td><a href="{{t.id}}">{{t.date|date:"d M Y"}}</a></td>
+    <td>{{ t.action }}</td>
+    <td>{{t.security}}</td>
+    <td>{{t.shares}}</td>
+    <td>{{t.price}}</td>
+    <td>{{t.commission}}</td>
+  </tr>
   {% endfor %}
-</ul>
+
+</table>
 
 {% endblock %}
