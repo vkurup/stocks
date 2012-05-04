@@ -1,3 +1,9 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block content %}
+
 <h2>Transactions</h2>
 <ul>
   {% for t in object_list %}
@@ -6,3 +12,5 @@
   </li>
   {% endfor %}
 </ul>
+
+{% endblock %}
