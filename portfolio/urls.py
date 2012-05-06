@@ -1,15 +1,10 @@
-from django.conf.urls import patterns, url, include
-from django.views.generic import ListView, DetailView, TemplateView
-from portfolio.models import Transaction
+from django.conf.urls import patterns
+from portfolio.views import MainView, TransactionListView, TransactionDetailView, TransactionCreateView
 
 urlpatterns = patterns(
     '',
-    (r'^$', TemplateView.as_view(
-            template_name="portfolio.html")),
-    (r'^txn/$', ListView.as_view(
-            model=Transaction,
-            template_name="transaction_list.html")),
-    (r'^txn/(?P<pk>\d+)/$', DetailView.as_view(
-            model=Transaction,
-            template_name="transaction_detail.html")),
+    (r'^$', MainView.as_view()),
+    (r'^txn/$', TransactionListView.as_view()),
+    (r'^txn/(?P<pk>\d+)/$', TransactionDetailView.as_view()),
+    (r'^txn/create$', TransactionCreateView.as_view()),
 )

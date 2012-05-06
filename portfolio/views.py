@@ -1,3 +1,15 @@
 from portfolio.models import Transaction
-from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView, TemplateView, CreateView
 
+class MainView(TemplateView):
+    template_name = "portfolio.html"
+
+class TransactionListView(ListView):
+    model = Transaction
+
+class TransactionDetailView(DetailView):
+    model = Transaction
+
+class TransactionCreateView(CreateView):
+    model = Transaction
+    success_url = "../txn"
