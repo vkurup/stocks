@@ -1,5 +1,5 @@
 from django.conf.urls import patterns
-from portfolio.views import MainView, TransactionListView, TransactionDetailView, TransactionCreateView
+from portfolio.views import MainView, TransactionListView, TransactionDetailView, TransactionCreateView, TransactionDeleteView
 
 urlpatterns = patterns(
     '',
@@ -7,4 +7,5 @@ urlpatterns = patterns(
     (r'^txn/$', TransactionListView.as_view()),
     (r'^txn/(?P<pk>\d+)/$', TransactionDetailView.as_view()),
     (r'^txn/create$', TransactionCreateView.as_view()),
+    (r'^txn/(?P<pk>\d+)/delete$', TransactionDeleteView.as_view()),
 )
