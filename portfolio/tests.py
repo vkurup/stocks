@@ -1,26 +1,45 @@
 """
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
+Tests for portfolio app
 """
 
+import factory
 from django.test import TestCase
 from django.utils import timezone
 from portfolio.models import Transaction
 
+class TransactionFactory(factory.Factory):
+    FACTORY_FOR = Transaction
+
+    action = 'BUY'
+    date = timezone.now()
+    security = 'AAPL'
+    shares = 100
+    price = 29.27
+    commission = 7.00
+
+
 class TransactionTest(TestCase):
     def test_create_transaction(self):
-        txn = Transaction()
-        txn.action = "BUY"
-        txn.date = timezone.now()
+        before = len(Transaction.objects.all())
+        TransactionFactory()
+        after = len(Transaction.objects.all())
+        self.assertEquals(after - before, 1)
 
+    def test_edit_transaction(self):
+        TransactionFactory()
+        txn = Transaction.objects.all()[0]
+
+        txn.price = 21.32
         txn.save()
 
-        all_txns = Transaction.objects.all()
-        self.assertEquals(len(all_txns), 1)
-        self.assertEquals(all_txns[0], txn)
+        edited_txn = Transaction.objects.get(pk = txn.pk)
 
-        self.assertEquals(all_txns[0].action, "BUY")
-        self.assertEquals(all_txns[0].date, txn.date)
+        self.assertEquals(float(edited_txn.price), 21.32)
+
+    def test_delete_transaction(self):
+        TransactionFactory()
+        txn = Transaction.objects.all()[0]
+        txn.delete()
+        txn = Transaction.objects.filter(pk = txn.pk)
+        self.assertTrue(len(txn) == 0)
 
