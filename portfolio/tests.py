@@ -5,7 +5,7 @@ Tests for portfolio app
 import factory
 from django.test import TestCase
 from django.utils import timezone
-from portfolio.models import Transaction
+from models import Transaction
 
 class TransactionFactory(factory.Factory):
     FACTORY_FOR = Transaction
