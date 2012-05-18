@@ -11,3 +11,11 @@ class Transaction(models.Model):
     def __unicode__(self):
         return self.action + ' ' + str(self.shares) + ' ' + self.security
 
+class Account(models.Model):
+    current_positions = {}
+    def buy_security(self, security='', shares=0):
+        pos = {'shares': shares}
+        self.current_positions[security] = pos
+
+    def positions(self):
+        return self.current_positions

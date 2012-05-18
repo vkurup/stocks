@@ -5,7 +5,7 @@ Tests for portfolio app
 import factory
 from django.test import TestCase
 from django.utils import timezone
-from models import Transaction
+from models import Transaction, Account
 
 class TransactionFactory(factory.Factory):
     FACTORY_FOR = Transaction
@@ -43,3 +43,14 @@ class TransactionTest(TestCase):
         txn = Transaction.objects.filter(pk = txn.pk)
         self.assertTrue(len(txn) == 0)
 
+class AccountTest(TestCase):
+
+    def test_create_account(self):
+        a = Account()
+        self.assertTrue(a)
+
+    def test_buy_security(self):
+        a = Account()
+        a.buy_security(security='AAPL', shares=100)
+        positions = a.positions()
+        self.assertEquals(positions['AAPL']['shares'], 100)
