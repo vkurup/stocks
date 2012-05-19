@@ -12,10 +12,27 @@ class Transaction(models.Model):
         return self.action + ' ' + str(self.shares) + ' ' + self.security
 
 class Account(models.Model):
-    current_positions = {}
-    def buy_security(self, security='', shares=0):
-        pos = {'shares': shares}
-        self.current_positions[security] = pos
+
+    def buy_security(self, action="BUY", security=None, shares=None, date=None, price=None, commission=0):
+        t = Transaction()
+        t.action = action
+        t.security = security
+        t.shares = shares
+        t.date = date
+        t.price = price
+        t.commission = commission
+        t.save()
+
+    def sell_security(self, security=None, shares=None, date=None, price=None, commission=0):
+        self.buy_security(action="SELL", security=security, shares=-shares, date=date, price=price, commission=commission)
 
     def positions(self):
-        return self.current_positions
+        txns = Transaction.objects.all()
+        positions = {}
+        for t in txns:
+            if t.security in positions:
+                positions[t.security]['shares'] += t.shares
+            else:
+                positions[t.security] = {'shares': t.shares}
+        return positions
+

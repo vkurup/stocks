@@ -45,12 +45,25 @@ class TransactionTest(TestCase):
 
 class AccountTest(TestCase):
 
+    def setUp(self):
+        self.a = Account()
+
     def test_create_account(self):
-        a = Account()
-        self.assertTrue(a)
+        self.assertTrue(self.a)
 
     def test_buy_security(self):
-        a = Account()
-        a.buy_security(security='AAPL', shares=100)
-        positions = a.positions()
+        self.a.buy_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
+        positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], 100)
+
+    def test_buy_more_security(self):
+        self.a.buy_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=50, price=29.45, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['AAPL']['shares'], 150)
+
+    def test_sell_security(self):
+        self.a.sell_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['AAPL']['shares'], -100)
+
