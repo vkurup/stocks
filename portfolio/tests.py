@@ -3,6 +3,7 @@ Tests for portfolio app
 """
 
 import factory
+from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 from models import Transaction, Account
@@ -66,4 +67,29 @@ class AccountTest(TestCase):
         self.a.sell_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], -100)
+
+    def test_dividend(self):
+        self.a.dividend(security='AAPL', amount=10.00, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], 10.00)
+
+    def test_deposit(self):
+        self.a.deposit(amount=1000.12, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12'))
+
+    def test_withdraw(self):
+        self.a.withdraw(amount=12.34, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('-12.34'))
+
+    def test_receive_interest(self):
+        self.a.receive_interest(amount=5.89, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('5.89'))
+
+    def test_pay_interest(self):
+        self.a.pay_interest(amount=33.31, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('-33.31'))
 

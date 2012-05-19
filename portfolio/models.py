@@ -26,6 +26,40 @@ class Account(models.Model):
     def sell_security(self, security=None, shares=None, date=None, price=None, commission=0):
         self.buy_security(action="SELL", security=security, shares=-shares, date=date, price=price, commission=commission)
 
+    def dividend(self, security=None, amount=0.00, date=None):
+        # fixme, this throws away security. Not sure where it should go
+        t = Transaction()
+        t.security='$CASH'
+        t.shares = amount
+        t.price = 1.00
+        t.date = date
+        t.commission = 0
+        t.save()
+
+    def deposit(self, amount=0, date=None):
+        t = Transaction()
+        t.security = '$CASH'
+        t.shares = amount
+        t.price = 1.00
+        t.date = date
+        t.commission = 0
+        t.save()
+
+    def withdraw(self, amount=0, date=None):
+        self.deposit(amount = -amount, date=date)
+
+    def receive_interest(self, amount=0, date=None):
+        t = Transaction()
+        t.security = '$CASH'
+        t.shares = amount
+        t.price = 1.00
+        t.commission = 0
+        t.date = date
+        t.save()
+
+    def pay_interest(self, amount=0, date=None):
+        self.receive_interest(-amount, date)
+
     def positions(self):
         txns = Transaction.objects.all()
         positions = {}
