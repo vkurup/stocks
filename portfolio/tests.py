@@ -93,3 +93,8 @@ class AccountTest(TestCase):
         positions = self.a.positions()
         self.assertEquals(positions['$CASH']['shares'], Decimal('-33.31'))
 
+    def test_buy_security_uses_cash(self):
+        self.a.deposit(amount=1000.12, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=10, price=29.45, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12') - Decimal('294.50'))
