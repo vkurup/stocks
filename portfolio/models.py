@@ -49,13 +49,7 @@ class Account(models.Model):
         self.deposit(amount = -amount, date=date)
 
     def receive_interest(self, amount=0, date=None):
-        t = Transaction()
-        t.security = '$CASH'
-        t.shares = amount
-        t.price = 1.00
-        t.commission = 0
-        t.date = date
-        t.save()
+        self.buy_security(action="INT", security='$CASH', shares=amount, date=date, price=1.00)
 
     def pay_interest(self, amount=0, date=None):
         self.receive_interest(-amount, date)
