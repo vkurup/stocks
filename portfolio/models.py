@@ -28,22 +28,10 @@ class Account(models.Model):
 
     def dividend(self, security=None, amount=0.00, date=None):
         # fixme, this throws away security. Not sure where it should go
-        t = Transaction()
-        t.security='$CASH'
-        t.shares = amount
-        t.price = 1.00
-        t.date = date
-        t.commission = 0
-        t.save()
+        self.buy_security(action="DIV", security='$CASH', shares=amount, date=date, price=1.00)
 
     def deposit(self, amount=0, date=None):
-        t = Transaction()
-        t.security = '$CASH'
-        t.shares = amount
-        t.price = 1.00
-        t.date = date
-        t.commission = 0
-        t.save()
+        self.buy_security(action="DEPOSIT", security='$CASH', shares=amount, date=date, price=1.00)
 
     def withdraw(self, amount=0, date=None):
         self.deposit(amount = -amount, date=date)
