@@ -23,6 +23,12 @@ class Account(models.Model):
         t.commission = commission
         t.save()
 
+        # other side of double-entry
+        #FIXME for CASH
+        if security != '$CASH':
+            cost = t.shares * t.price + t.commission
+            self.sell_security(security = '$CASH', shares = cost, date=date, price=1.00)
+
     def sell_security(self, security=None, shares=None, date=None, price=None, commission=0):
         self.buy_security(action="SELL", security=security, shares=-shares, date=date, price=price, commission=commission)
 
