@@ -54,7 +54,19 @@ class Account(models.Model):
         for t in txns:
             if t.security in positions:
                 positions[t.security]['shares'] += t.shares
+                positions[t.security]['price'] = t.price
             else:
-                positions[t.security] = {'shares': t.shares}
+                positions[t.security] = {'shares': t.shares,
+                                         'price': t.price}
         return positions
+
+    def value(self, security=None):
+        pos = self.positions()
+        if security:
+            return pos[security]['shares'] * pos[security]['price']
+        else:
+            value = 0
+            for p in pos:
+                value += pos[p]['shares'] * pos[p]['price']
+            return value
 

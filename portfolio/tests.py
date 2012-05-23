@@ -98,3 +98,20 @@ class AccountTest(TestCase):
         self.a.buy_security(security='AAPL', shares=10, price=29.45, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12') - Decimal('294.50'))
+
+    def test_buy_security_check_security_value(self):
+        self.a.buy_security(security='AAPL', shares=10, 
+                            price=29.45, date=timezone.now())
+        value = self.a.value(security='AAPL')
+        self.assertEquals(value, 294.50)
+
+    def test_buy_security_check_account_value(self):
+        self.a.deposit(amount=1000.00, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=10,
+                            price=15.00, date=timezone.now())
+        self.a.receive_interest(amount=10.00, date=timezone.now())
+        value = self.a.value()
+        cash = self.a.value(security='$CASH')
+        self.assertEquals(value, 1010.00)
+        self.assertEquals(cash, 860.00)
+
