@@ -7,19 +7,21 @@ class Transaction(models.Model):
     shares = models.DecimalField(decimal_places=2, max_digits=10)
     price = models.DecimalField(decimal_places=2, max_digits=10)
     commission = models.DecimalField(decimal_places=2, max_digits=10)
+    dividend_from = models.CharField(max_length=10, blank=True)
 
     def __unicode__(self):
         return self.action + ' ' + str(self.shares) + ' ' + self.security
 
 class Account(models.Model):
 
-    def buy_security(self, action="BUY", security=None, shares=None, date=None, price=None, commission=0):
+    def buy_security(self, action="BUY", security=None, shares=None, date=None, price=None, dividend_from='', commission=0):
         t = Transaction()
         t.action = action
         t.security = security
         t.shares = shares
         t.date = date
         t.price = price
+        t.dividend_from=dividend_from
         t.commission = commission
         t.save()
 
@@ -33,8 +35,7 @@ class Account(models.Model):
         self.buy_security(action="SELL", security=security, shares=-shares, date=date, price=price, commission=commission)
 
     def dividend(self, security=None, amount=0.00, date=None):
-        # fixme, this throws away security. Not sure where it should go
-        self.buy_security(action="DIV", security='$CASH', shares=amount, date=date, price=1.00)
+        self.buy_security(action="DIV", security='$CASH', dividend_from=security, shares=amount, date=date, price=1.00)
 
     def deposit(self, amount=0, date=None):
         self.buy_security(action="DEPOSIT", security='$CASH', shares=amount, date=date, price=1.00)
@@ -52,12 +53,12 @@ class Account(models.Model):
         txns = Transaction.objects.all()
         positions = {}
         for t in txns:
-            if t.security in positions:
-                positions[t.security]['shares'] += t.shares
-                positions[t.security]['price'] = t.price
-            else:
-                positions[t.security] = {'shares': t.shares,
-                                         'price': t.price}
+            if t.security not in positions:
+                positions[t.security] = {'shares': 0,'price': 0,'dividends': 0}
+            positions[t.security]['shares'] += t.shares
+            positions[t.security]['price'] = t.price
+            if t.action == 'DIV':
+                positions[t.dividend_from]['dividends'] += t.shares * t.price
         return positions
 
     def value(self, security=None):
@@ -65,8 +66,6 @@ class Account(models.Model):
         if security:
             return pos[security]['shares'] * pos[security]['price']
         else:
-            value = 0
-            for p in pos:
-                value += pos[p]['shares'] * pos[p]['price']
+            value = sum(pos[p]['shares'] * pos[p]['price'] for p in pos)
             return value
 

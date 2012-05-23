@@ -115,3 +115,10 @@ class AccountTest(TestCase):
         self.assertEquals(value, 1010.00)
         self.assertEquals(cash, 860.00)
 
+    def test_security_plus_dividend_correct_value(self):
+        self.a.buy_security(security='AAPL', shares=10,
+                            price=15.00, date=timezone.now())
+        self.a.dividend(security='AAPL', amount=10.00, date=timezone.now())
+        value = self.a.value(security='AAPL')
+        self.assertEquals(value, 160.00)
+
