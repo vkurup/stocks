@@ -55,6 +55,8 @@ class Account(models.Model):
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = {'shares': 0,'price': 0,'dividends': 0}
+            if t.dividend_from not in positions:
+                positions[t.dividend_from] = {'shares': 0,'price': 0,'dividends': 0}
             positions[t.security]['shares'] += t.shares
             positions[t.security]['price'] = t.price
             if t.action == 'DIV':
@@ -68,4 +70,8 @@ class Account(models.Model):
         else:
             value = sum(pos[p]['shares'] * pos[p]['price'] for p in pos)
             return value
-
+    
+    def total_return(self, security=None):
+        value = self.value(security)
+        pos = self.positions()
+        return value + pos[security]['dividends']
