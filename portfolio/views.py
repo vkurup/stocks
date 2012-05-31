@@ -1,4 +1,4 @@
-from portfolio.models import Transaction
+from portfolio.models import Transaction, Account
 from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
 
 class MainView(TemplateView):
@@ -13,9 +13,24 @@ class TransactionDetailView(UpdateView):
 
 class TransactionCreateView(CreateView):
     model = Transaction
-    success_url = "../txn"
+    success_url = "/portfolio/txn"
 
 class TransactionDeleteView(DeleteView):
     model = Transaction
     success_url = "/portfolio/txn"
 
+
+class AccountListView(ListView):
+    model = Account
+
+class AccountDetailView(UpdateView):
+    model = Account
+    success_url = "/portfolio/account"
+
+class AccountCreateView(CreateView):
+    model = Account
+    success_url = "/portfolio/account"
+
+class AccountDeleteView(DeleteView):
+    model = Account
+    success_url = "/portfolio/account"

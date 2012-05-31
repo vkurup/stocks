@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}New Account{% endblock %}
+
+{% block content %}
+
+<h2>Portfolio: New Account</h2>
+<hr>
+
+<form method="post">
+  {% csrf_token %}
+  <table>
+    {{ form }}
+  </table>
+  <input type="submit" />
+</form>
+
+{% endblock %}

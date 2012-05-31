@@ -13,6 +13,7 @@ class Transaction(models.Model):
         return self.action + ' ' + str(self.shares) + ' ' + self.security
 
 class Account(models.Model):
+    name = models.CharField(max_length=50)
 
     def buy_security(self, action="BUY", security=None, shares=None, date=None, price=None, dividend_from='', commission=0):
         t = Transaction()
