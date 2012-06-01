@@ -3,8 +3,7 @@ from portfolio.views import *
 
 urlpatterns = patterns(
     '',
-    (r'^$', MainView.as_view()),
-    (r'^account/$', AccountListView.as_view()),
+    (r'^$', AccountListView.as_view()),
     (r'^account/(?P<pk>\d+)/$', AccountDetailView.as_view()),
     (r'^account/create$', AccountCreateView.as_view()),
     (r'^txn/$', TransactionListView.as_view()),

@@ -1,8 +1,5 @@
 from portfolio.models import Transaction, Account
-from django.views.generic import ListView, TemplateView, CreateView, UpdateView, DeleteView
-
-class MainView(TemplateView):
-    template_name = "portfolio.html"
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 class TransactionListView(ListView):
     model = Transaction
