@@ -1,5 +1,7 @@
 from portfolio.models import Transaction, Account
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 
 class TransactionListView(ListView):
     model = Transaction
@@ -20,7 +22,10 @@ class TransactionDeleteView(DeleteView):
 class AccountListView(ListView):
     model = Account
 
-class AccountDetailView(UpdateView):
+class AccountDetailView(DetailView):
+    model = Account
+
+class AccountEditView(UpdateView):
     model = Account
     success_url = "/portfolio/account"
 
@@ -31,3 +36,14 @@ class AccountCreateView(CreateView):
 class AccountDeleteView(DeleteView):
     model = Account
     success_url = "/portfolio/account"
+
+
+# Functions
+def deposit(request, account_id):
+    if request.method == 'GET':
+        return render(request, 'portfolio/deposit.html')
+    else:
+        a = get_object_or_404(Account, pk=account_id)
+        amount = request.POST['amount']
+        a.deposit(amount, timezone.now())
+        return redirect('/portfolio/account/' + account_id)

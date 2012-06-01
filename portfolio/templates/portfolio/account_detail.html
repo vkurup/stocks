@@ -7,15 +7,12 @@
 <h2>Portfolio: Account</h2>
 <hr>
 
-<form action="" method="post">
-  {% csrf_token %}
-  <table>
-    <tr>
-      <th>Name</th>
-      <td><input type="text" name="name" value="{{ account.name }}" /></td>
-    </tr>
-  </table>
-  <input type="submit" />
-</form>
+<h3>{{ account.name }}</h3>
+
+{{ account.positions }}
+
+<p>
+<a href="deposit">Deposit Cash</a>
+</p>
 
 {% endblock %}

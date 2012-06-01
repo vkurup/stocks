@@ -15,8 +15,11 @@
 
   {% for a in object_list %}
   <tr>
-    <td><a href="{{a.id}}">{{a.name}}</a></td>
-    <td><a href="{{a.id}}/delete">Delete</a></td>
+    <td><a href="account/{{a.id}}">{{a.name}}</a></td>
+    <td>
+      <a href="account/{{a.id}}/edit">Edit</a>
+      <a href="account/{{a.id}}/delete">Delete</a>
+    </td>
   </tr>
   {% endfor %}
 
