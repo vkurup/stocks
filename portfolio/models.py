@@ -76,3 +76,8 @@ class Account(models.Model):
         value = self.value(security)
         pos = self.positions()
         return value + pos[security]['dividends']
+
+    @property
+    def cash(self):
+        pos = self.positions()
+        return pos['$CASH']['shares']

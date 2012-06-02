@@ -122,3 +122,7 @@ class AccountTest(TestCase):
         tr = self.a.total_return(security='AAPL')
         self.assertEquals(tr, 160.00)
 
+    def test_deposit_sets_cash(self):
+        self.a.deposit(amount=123.45, date=timezone.now())
+        cash = self.a.cash
+        self.assertEquals(cash, Decimal('123.45'))
