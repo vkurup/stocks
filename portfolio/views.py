@@ -47,3 +47,16 @@ def deposit(request, account_id):
         amount = request.POST['amount']
         a.deposit(amount, timezone.now())
         return redirect('/portfolio/account/' + account_id)
+
+def buy(request, account_id):
+    if request.method == 'GET':
+        return render(request, 'portfolio/buy.html')
+    else:
+        a = get_object_or_404(Account, pk=account_id)
+        security = request.POST['security']
+        shares = request.POST['shares']
+        price = request.POST['price']
+        commission = request.POST['commission']
+        a.buy_security(security=security, shares=shares, date=timezone.now(),
+                       price=price, commission=commission)
+        return redirect('/portfolio/account/' + account_id)

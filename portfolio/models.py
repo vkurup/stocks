@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 class Transaction(models.Model):
     action = models.CharField(max_length=10)
@@ -19,11 +20,11 @@ class Account(models.Model):
         t = Transaction()
         t.action = action
         t.security = security
-        t.shares = shares
+        t.shares = Decimal(shares)
         t.date = date
-        t.price = price
-        t.dividend_from=dividend_from
-        t.commission = commission
+        t.price = Decimal(price)
+        t.dividend_from = dividend_from
+        t.commission = Decimal(commission)
         t.save()
 
         # other side of double-entry

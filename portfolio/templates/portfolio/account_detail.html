@@ -14,7 +14,15 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
 
 <ul>
   <li><a href="deposit">Deposit Cash</a></li>
+  {% if account.cash > 0 %}
+  <li><a href="buy">Buy Security</a></li>
+  {% endif %}
 </ul>
 
+{% for k,v in account.positions.items %}
+  {% if k != '' and k != '$CASH' %}
+  security: {{ k }} = {{ v.shares }} <br>
+  {% endif %}
+{% endfor %}
 
 {% endblock %}
