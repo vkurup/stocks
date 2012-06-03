@@ -125,4 +125,4 @@ class AccountTest(TestCase):
     def test_deposit_sets_cash(self):
         self.a.deposit(amount=123.45, date=timezone.now())
         cash = self.a.cash
-        self.assertEquals(cash, Decimal('123.45'))
+        self.assertEquals(cash, 123.45)

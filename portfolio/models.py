@@ -80,4 +80,4 @@ class Account(models.Model):
     @property
     def cash(self):
         pos = self.positions()
-        return pos['$CASH']['shares']
+        return float(pos['$CASH']['shares'])

@@ -113,6 +113,8 @@ TEMPLATE_DIRS = (
     'templates'
 )
 
+DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS':  False}
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -126,6 +128,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'portfolio',
     'debug_toolbar',
+    'django.contrib.humanize',
 )
 
 # A sample logging configuration. The only tangible logging

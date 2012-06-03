@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block title %}One Account{% endblock %}
 
@@ -9,10 +10,11 @@
 
 <h3>{{ account.name }}</h3>
 
-{{ account.positions }}
+Cash: ${{ account.cash|floatformat:2|intcomma }}
 
-<p>
-<a href="deposit">Deposit Cash</a>
-</p>
+<ul>
+  <li><a href="deposit">Deposit Cash</a></li>
+</ul>
+
 
 {% endblock %}
