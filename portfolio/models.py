@@ -1,23 +1,12 @@
 from django.db import models
 from decimal import Decimal
 
-class Transaction(models.Model):
-    action = models.CharField(max_length=10)
-    date = models.DateTimeField('transaction date')
-    security = models.CharField(max_length=10)
-    shares = models.DecimalField(decimal_places=2, max_digits=10)
-    price = models.DecimalField(decimal_places=2, max_digits=10)
-    commission = models.DecimalField(decimal_places=2, max_digits=10)
-    dividend_from = models.CharField(max_length=10, blank=True)
-
-    def __unicode__(self):
-        return self.action + ' ' + str(self.shares) + ' ' + self.security
-
 class Account(models.Model):
     name = models.CharField(max_length=50)
 
     def buy_security(self, action="BUY", security=None, shares=None, date=None, price=None, dividend_from='', commission=0):
         t = Transaction()
+        t.account = self
         t.action = action
         t.security = security
         t.shares = Decimal(shares)
@@ -52,12 +41,12 @@ class Account(models.Model):
         self.receive_interest(-amount, date)
 
     def positions(self):
-        txns = Transaction.objects.all()
+        txns = Transaction.objects.filter(account=self)
         positions = {}
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = {'shares': 0,'price': 0,'dividends': 0}
-            if t.dividend_from not in positions:
+            if t.dividend_from and t.dividend_from not in positions:
                 positions[t.dividend_from] = {'shares': 0,'price': 0,'dividends': 0}
             positions[t.security]['shares'] += t.shares
             positions[t.security]['price'] = t.price
@@ -82,3 +71,20 @@ class Account(models.Model):
     def cash(self):
         pos = self.positions()
         return float(pos['$CASH']['shares'])
+
+
+
+
+class Transaction(models.Model):
+    account = models.ForeignKey(Account)
+    action = models.CharField(max_length=10)
+    date = models.DateTimeField('transaction date')
+    security = models.CharField(max_length=10)
+    shares = models.DecimalField(decimal_places=2, max_digits=10)
+    price = models.DecimalField(decimal_places=2, max_digits=10)
+    commission = models.DecimalField(decimal_places=2, max_digits=10)
+    dividend_from = models.CharField(max_length=10, blank=True)
+
+    def __unicode__(self):
+        return self.action + ' ' + str(self.shares) + ' ' + self.security
+

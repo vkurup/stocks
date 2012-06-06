@@ -11,6 +11,7 @@ from models import Transaction, Account
 class TransactionFactory(factory.Factory):
     FACTORY_FOR = Transaction
 
+    account_id = 1
     action = 'BUY'
     date = timezone.now()
     security = 'AAPL'
@@ -48,6 +49,7 @@ class AccountTest(TestCase):
 
     def setUp(self):
         self.a = Account()
+        self.a.save()
 
     def test_create_account(self):
         self.assertTrue(self.a)
@@ -126,3 +128,11 @@ class AccountTest(TestCase):
         self.a.deposit(amount=123.45, date=timezone.now())
         cash = self.a.cash
         self.assertEquals(cash, 123.45)
+
+    def test_account_transactions_are_separate(self):
+        self.a.deposit(amount=5, date=timezone.now())
+        b = Account()
+        b.save()
+        b.deposit(amount=10, date=timezone.now())
+        self.assertEquals(self.a.cash, 5)
+        self.assertEquals(b.cash, 10)

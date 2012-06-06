@@ -19,8 +19,10 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
   {% endif %}
 </ul>
 
+{{account.positions.AAPL.shares}}
+
 {% for k,v in account.positions.items %}
-  {% if k != '' and k != '$CASH' %}
+  {% if k != '$CASH' %}
   security: {{ k }} = {{ v.shares }} <br>
   {% endif %}
 {% endfor %}
