@@ -27,15 +27,15 @@ class AccountDetailView(DetailView):
 
 class AccountEditView(UpdateView):
     model = Account
-    success_url = "/portfolio/account"
+    success_url = "/portfolio"
 
 class AccountCreateView(CreateView):
     model = Account
-    success_url = "/portfolio/account"
+    success_url = "/portfolio"
 
 class AccountDeleteView(DeleteView):
     model = Account
-    success_url = "/portfolio/account"
+    success_url = "/portfolio"
 
 
 # Functions

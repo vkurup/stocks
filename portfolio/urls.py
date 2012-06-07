@@ -6,6 +6,7 @@ urlpatterns = patterns(
     (r'^$', AccountListView.as_view()),
     (r'^account/(?P<pk>\d+)/$', AccountDetailView.as_view()),
     (r'^account/(?P<pk>\d+)/edit$', AccountEditView.as_view()),
+    (r'^account/(?P<pk>\d+)/delete$', AccountDeleteView.as_view()),
     (r'^account/(?P<account_id>\d+)/deposit$', 'portfolio.views.deposit'),
     (r'^account/(?P<account_id>\d+)/buy$', 'portfolio.views.buy'),
     (r'^account/create$', AccountCreateView.as_view()),
