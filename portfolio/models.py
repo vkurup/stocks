@@ -42,7 +42,7 @@ class Account(models.Model):
 
     def positions(self):
         txns = Transaction.objects.filter(account=self)
-        positions = {}
+        positions = {'$CASH': {'shares': 0,'price': 1,'dividends': 0}}
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = {'shares': 0,'price': 0,'dividends': 0}
