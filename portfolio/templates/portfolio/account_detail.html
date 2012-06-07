@@ -19,12 +19,22 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
   {% endif %}
 </ul>
 
-{{account.positions.AAPL.shares}}
 
-{% for k,v in account.positions.items %}
-  {% if k != '$CASH' %}
-  security: {{ k }} = {{ v.shares }} <br>
+<table>
+  <tr>
+    <th>Security</th>
+    <th>Shares</th>
+    <th>Price</th>
+  </tr>
+{% for security,data in account.positions.items %}
+  {% if security != '$CASH' %}
+  <tr>
+    <td>{{ security }}</td>
+    <td>{{ data.shares }}</td>
+    <td>{{ data.price }}</td>
+  </tr>
   {% endif %}
 {% endfor %}
+</table>
 
 {% endblock %}
