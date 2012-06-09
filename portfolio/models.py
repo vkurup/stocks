@@ -41,8 +41,8 @@ class Account(models.Model):
         self.receive_interest(-amount, date)
 
     def positions(self):
-        txns = Transaction.objects.filter(account=self)
         positions = {'$CASH': {'shares': 0,'price': 1,'dividends': 0}}
+        txns = Transaction.objects.filter(account=self)
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = {'shares': 0,'price': 0,'dividends': 0}
@@ -55,22 +55,22 @@ class Account(models.Model):
         return positions
 
     def value(self, security=None):
-        pos = self.positions()
+        positions = self.positions()
         if security:
-            return pos[security]['shares'] * pos[security]['price']
+            return positions[security]['shares'] * positions[security]['price']
         else:
-            value = sum(pos[p]['shares'] * pos[p]['price'] for p in pos)
+            value = sum(positions[p]['shares'] * positions[p]['price'] for p in positions)
             return value
     
     def total_return(self, security=None):
         value = self.value(security)
-        pos = self.positions()
-        return value + pos[security]['dividends']
+        positions = self.positions()
+        return value + positions[security]['dividends']
 
     @property
     def cash(self):
-        pos = self.positions()
-        return float(pos['$CASH']['shares'])
+        positions = self.positions()
+        return float(positions['$CASH']['shares'])
 
 
 
