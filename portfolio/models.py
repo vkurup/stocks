@@ -41,15 +41,16 @@ class Account(models.Model):
         self.receive_interest(-amount, date)
 
     def positions(self):
-        positions = {'$CASH': {'shares': 0,'price': 1,'dividends': 0}}
+        positions = {'$CASH': {'shares': 0,'price': 1,'basis': 0, 'dividends': 0}}
         txns = Transaction.objects.filter(account=self)
         for t in txns:
             if t.security not in positions:
-                positions[t.security] = {'shares': 0,'price': 0,'dividends': 0}
+                positions[t.security] = {'shares': 0,'price': 0,'basis': 0, 'dividends': 0}
             if t.dividend_from and t.dividend_from not in positions:
-                positions[t.dividend_from] = {'shares': 0,'price': 0,'dividends': 0}
+                positions[t.dividend_from] = {'shares': 0,'price': 0,'basis': 0, 'dividends': 0}
             positions[t.security]['shares'] += t.shares
             positions[t.security]['price'] = t.price
+            positions[t.security]['basis'] += t.shares * t.price + t.commission
             if t.action == 'DIV':
                 positions[t.dividend_from]['dividends'] += t.shares * t.price
         return positions

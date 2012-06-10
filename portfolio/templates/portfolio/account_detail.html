@@ -35,13 +35,13 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
   {% if security != '$CASH' %}
   <tr>
     <td>{{ security }}</td>
-    <td>latest price</td>
+    <td>{{ data.price }}</td>
     <td>{{ data.shares }}</td>
+    <td>{{ data.basis }}</td>
     <td>{{ data.shares }} * {{ data.price }}</td>
-    <td>{{ data.shares }} * latest price</td>
-    <td>Mkt Value - Cost Basis</td>
+    <td>Mkt Value - {{ data.basis }}</td>
     <td>{{ data.dividends }}</td>
-    <td>(Mkt Value + {{ data.dividends }}) / Cost Basis</td>
+    <td>(Mkt Value + {{ data.dividends }}) / {{ data.basis }}</td>
   </tr>
   {% endif %}
 {% endfor %}

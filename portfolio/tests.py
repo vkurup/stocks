@@ -136,3 +136,29 @@ class AccountTest(TestCase):
         b.deposit(amount=10, date=timezone.now())
         self.assertEquals(self.a.cash, 5)
         self.assertEquals(b.cash, 10)
+
+    def test_cost_basis_is_correct(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=20.00, date=timezone.now())
+        positions = self.a.positions()
+        cost_basis = positions['AAPL']['basis']
+        self.assertEquals(cost_basis, 2000)
+
+    def test_cost_basis_includes_commission(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=20.00, commission=7.00, 
+                            date=timezone.now())
+        positions = self.a.positions()
+        cost_basis = positions['AAPL']['basis']
+        self.assertEquals(cost_basis, 2007)
+
+    def test_cost_basis_multiple_buys(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=8.00, commission=3.00, 
+                            date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=200,
+                            price=6.00, commission=4.00, 
+                            date=timezone.now())
+        positions = self.a.positions()
+        cost_basis = positions['AAPL']['basis']
+        self.assertEquals(cost_basis, 2007)
