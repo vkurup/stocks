@@ -23,15 +23,25 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
 <table>
   <tr>
     <th>Security</th>
+    <th>Last Price</th>
     <th>Shares</th>
-    <th>Price</th>
+    <th>Cost Basis</th>
+    <th>Mkt Value</th>
+    <th>Gain</th>
+    <th>Dividends</th>
+    <th>Overall return</th>
   </tr>
 {% for security,data in account.positions.items %}
   {% if security != '$CASH' %}
   <tr>
     <td>{{ security }}</td>
+    <td>latest price</td>
     <td>{{ data.shares }}</td>
-    <td>{{ data.price }}</td>
+    <td>{{ data.shares }} * {{ data.price }}</td>
+    <td>{{ data.shares }} * latest price</td>
+    <td>Mkt Value - Cost Basis</td>
+    <td>{{ data.dividends }}</td>
+    <td>(Mkt Value + {{ data.dividends }}) / Cost Basis</td>
   </tr>
   {% endif %}
 {% endfor %}
