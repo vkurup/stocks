@@ -162,3 +162,23 @@ class AccountTest(TestCase):
         positions = self.a.positions()
         cost_basis = positions['AAPL']['basis']
         self.assertEquals(cost_basis, 2007)
+
+    def test_market_value_doesnt_include_commission(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            commission=7.00,
+                            price=20.00, date=timezone.now())
+        positions = self.a.positions()
+        market_value = positions['AAPL']['mktval']
+        self.assertEquals(market_value, 2000)
+
+    def test_market_value_for_2_buys(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            commission=7.00,
+                            price=20.00, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=10,
+                            commission=5.00,
+                            price=23.00, date=timezone.now())
+        positions = self.a.positions()
+        market_value = positions['AAPL']['mktval']
+        self.assertEquals(market_value, 2530)
+        

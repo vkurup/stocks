@@ -38,10 +38,10 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
     <td>{{ data.price }}</td>
     <td>{{ data.shares }}</td>
     <td>{{ data.basis }}</td>
-    <td>{{ data.shares }} * {{ data.price }}</td>
-    <td>Mkt Value - {{ data.basis }}</td>
+    <td>{{ data.mktval }}</td>
+    <td>{{ data.mktval }} - {{ data.basis }}</td>
     <td>{{ data.dividends }}</td>
-    <td>(Mkt Value + {{ data.dividends }}) / {{ data.basis }}</td>
+    <td>({{ data.mktval }} + {{ data.dividends }}) / {{ data.basis }}</td>
   </tr>
   {% endif %}
 {% endfor %}
