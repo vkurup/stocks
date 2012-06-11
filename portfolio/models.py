@@ -42,20 +42,28 @@ class Account(models.Model):
 
     def positions(self):
         positions = {'$CASH': dict(shares=0, price=1, basis=0, 
-                                   mktval=0, dividends=0)}
-        txns = Transaction.objects.filter(account=self)
+                                   mktval=0, gain=0, dividends=0,
+                                   total_return=0)}
+        txns = Transaction.objects.filter(account=self).order_by('date')
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = dict(shares=0, price=0, basis=0, 
-                                             mktval=0, dividends=0)
+                                             mktval=0, gain=0, dividends=0,
+                                             total_return=0)
             if t.dividend_from and t.dividend_from not in positions:
                 positions[t.dividend_from] = dict(shares=0, price=0, basis=0, 
-                                                  mktval=0, dividends=0)
+                                                  mktval=0, gain=0, dividends=0,
+                                                  total_return=0)
             positions[t.security]['shares'] += t.shares
             positions[t.security]['price'] = t.price
             positions[t.security]['basis'] += t.shares * t.price + t.commission
-            positions[t.security]['mktval'] = \
-                positions[t.security]['shares'] * t.price
+            basis = positions[t.security]['basis']
+            mktval = positions[t.security]['shares'] * t.price
+            positions[t.security]['mktval'] = mktval
+            positions[t.security]['gain'] = mktval - basis
+            dividends = positions[t.security]['dividends']
+            positions[t.security]['total_return'] = ((mktval + dividends)/basis - 1) * 100
+
             if t.action == 'DIV':
                 positions[t.dividend_from]['dividends'] += t.shares * t.price
         return positions

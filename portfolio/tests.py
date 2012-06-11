@@ -182,3 +182,10 @@ class AccountTest(TestCase):
         market_value = positions['AAPL']['mktval']
         self.assertEquals(market_value, 2530)
         
+    def test_gain_is_correct(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            commission=7.00,
+                            price=20.00, date=timezone.now())
+        positions = self.a.positions()
+        gain = positions['AAPL']['gain']
+        self.assertEquals(gain, -7)
