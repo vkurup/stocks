@@ -50,6 +50,7 @@ class AccountTest(TestCase):
     def setUp(self):
         self.a = Account()
         self.a.save()
+        self.a.deposit(amount=10000, date=timezone.now())
 
     def test_create_account(self):
         self.assertTrue(self.a)
@@ -66,40 +67,41 @@ class AccountTest(TestCase):
         self.assertEquals(positions['AAPL']['shares'], 150)
 
     def test_sell_security(self):
-        self.a.sell_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
+        self.a.deposit(amount=10000, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
+        self.a.sell_security(security='AAPL', shares=99, price=29.27, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['AAPL']['shares'], -100)
+        self.assertEquals(positions['AAPL']['shares'], 1)
 
     def test_dividend(self):
         self.a.dividend(security='AAPL', amount=10.00, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], 10.00)
+        self.assertEquals(positions['$CASH']['shares'], 10010.00)
 
     def test_deposit(self):
         self.a.deposit(amount=1000.12, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('11000.12'))
 
     def test_withdraw(self):
-        self.a.withdraw(amount=12.34, date=timezone.now())
+        self.a.withdraw(amount=10, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('-12.34'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('9990'))
 
     def test_receive_interest(self):
         self.a.receive_interest(amount=5.89, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('5.89'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('10005.89'))
 
     def test_pay_interest(self):
-        self.a.pay_interest(amount=33.31, date=timezone.now())
+        self.a.pay_interest(amount=20, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('-33.31'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('9980'))
 
     def test_buy_security_uses_cash(self):
-        self.a.deposit(amount=1000.12, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=10, price=29.45, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12') - Decimal('294.50'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('10000') - Decimal('294.50'))
 
     def test_buy_security_check_security_value(self):
         self.a.buy_security(security='AAPL', shares=10, 
@@ -108,16 +110,16 @@ class AccountTest(TestCase):
         self.assertEquals(value, 294.50)
 
     def test_buy_security_check_account_value(self):
-        self.a.deposit(amount=1000.00, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=10,
                             price=15.00, date=timezone.now())
         self.a.receive_interest(amount=10.00, date=timezone.now())
         value = self.a.value()
         cash = self.a.value(security='$CASH')
-        self.assertEquals(value, 1010.00)
-        self.assertEquals(cash, 860.00)
+        self.assertEquals(value, 10010.00)
+        self.assertEquals(cash, 9860.00)
 
     def test_security_plus_dividend_correct_return(self):
+        self.a.deposit(amount=1000.00, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=10,
                             price=15.00, date=timezone.now())
         self.a.dividend(security='AAPL', amount=10.00, date=timezone.now())
@@ -127,14 +129,14 @@ class AccountTest(TestCase):
     def test_deposit_sets_cash(self):
         self.a.deposit(amount=123.45, date=timezone.now())
         cash = self.a.cash
-        self.assertEquals(cash, 123.45)
+        self.assertEquals(cash, 10123.45)
 
     def test_account_transactions_are_separate(self):
         self.a.deposit(amount=5, date=timezone.now())
         b = Account()
         b.save()
         b.deposit(amount=10, date=timezone.now())
-        self.assertEquals(self.a.cash, 5)
+        self.assertEquals(self.a.cash, 10005)
         self.assertEquals(b.cash, 10)
 
     def test_cost_basis_is_correct(self):
@@ -163,7 +165,18 @@ class AccountTest(TestCase):
         cost_basis = positions['AAPL']['basis']
         self.assertEquals(cost_basis, 2007)
 
+    def test_cost_basis_after_sell(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=20.00, commission=0, 
+                            date=timezone.now())
+        self.a.sell_security(security='AAPL', shares=50, 
+                             price=30, date=timezone.now())
+        positions = self.a.positions()
+        cost_basis = positions['AAPL']['basis']
+        self.assertEquals(cost_basis, 1000)
+
     def test_market_value_doesnt_include_commission(self):
+        self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=100,
                             commission=7.00,
                             price=20.00, date=timezone.now())
@@ -172,6 +185,7 @@ class AccountTest(TestCase):
         self.assertEquals(market_value, 2000)
 
     def test_market_value_for_2_buys(self):
+        self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=100,
                             commission=7.00,
                             price=20.00, date=timezone.now())
@@ -183,6 +197,7 @@ class AccountTest(TestCase):
         self.assertEquals(market_value, 2530)
         
     def test_gain_is_correct(self):
+        self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=100,
                             commission=7.00,
                             price=20.00, date=timezone.now())
