@@ -1,7 +1,6 @@
 from portfolio.models import Transaction, Account
-from portfolio.forms import BuyForm, DepositForm
+from portfolio.forms import BuyForm, DepositForm, InterestForm
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 
 class TransactionListView(ListView):
@@ -69,3 +68,16 @@ def buy(request, account_id):
                            price=price, commission=commission)
             return redirect('/portfolio/account/' + account_id)
     return render(request, 'portfolio/buy.html', {'form': form})
+
+def interest(request, account_id):
+    a = get_object_or_404(Account, pk=account_id)
+    if request.method == 'GET':
+        form = InterestForm()
+    else:
+        form = InterestForm(request.POST)
+        if form.is_valid():
+            date = form.cleaned_data['date']
+            amount = form.cleaned_data['amount']
+            a.receive_interest(amount=amount, date=date)
+            return redirect('/portfolio/account/' + account_id)
+    return render(request, 'portfolio/interest.html', {'form': form})

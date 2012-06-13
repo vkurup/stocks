@@ -10,3 +10,7 @@ class BuyForm(forms.Form):
 class DepositForm(forms.Form):
     date = forms.DateField()
     amount = forms.DecimalField()
+
+class InterestForm(forms.Form):
+    date = forms.DateField()
+    amount = forms.DecimalField()
