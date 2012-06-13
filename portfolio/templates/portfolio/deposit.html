@@ -7,9 +7,10 @@
 <h2>Portfolio: Deposit Cash</h2>
 <hr>
 
-<form method="post">
-  {% csrf_token %}
-  <p><label>Amount:</label> <input type="text" name="amount"></p>
+<form method="post">{% csrf_token %}
+  <table>
+    {{ form.as_table }}
+  </table>
   <input type="submit" />
 </form>
 

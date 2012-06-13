@@ -1,4 +1,5 @@
 from portfolio.models import Transaction, Account
+from portfolio.forms import BuyForm, DepositForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
@@ -40,23 +41,31 @@ class AccountDeleteView(DeleteView):
 
 # Functions
 def deposit(request, account_id):
+    a = get_object_or_404(Account, pk=account_id)
     if request.method == 'GET':
-        return render(request, 'portfolio/deposit.html')
+        form = DepositForm()
     else:
-        a = get_object_or_404(Account, pk=account_id)
-        amount = request.POST['amount']
-        a.deposit(amount, timezone.now())
-        return redirect('/portfolio/account/' + account_id)
+        form = DepositForm(request.POST)
+        if form.is_valid():
+            date = form.cleaned_data['date']
+            amount = form.cleaned_data['amount']
+            a.deposit(amount=amount, date=date)
+            return redirect('/portfolio/account/' + account_id)
+    return render(request, 'portfolio/deposit.html', {'form': form})
 
 def buy(request, account_id):
+    a = get_object_or_404(Account, pk=account_id)
     if request.method == 'GET':
-        return render(request, 'portfolio/buy.html')
+        form = BuyForm()
     else:
-        a = get_object_or_404(Account, pk=account_id)
-        security = request.POST['security']
-        shares = request.POST['shares']
-        price = request.POST['price']
-        commission = request.POST['commission']
-        a.buy_security(security=security, shares=shares, date=timezone.now(),
-                       price=price, commission=commission)
-        return redirect('/portfolio/account/' + account_id)
+        form = BuyForm(request.POST)
+        if form.is_valid():
+            date = form.cleaned_data['date']
+            security = form.cleaned_data['security']
+            shares = form.cleaned_data['shares']
+            price = form.cleaned_data['price']
+            commission = form.cleaned_data['commission']
+            a.buy_security(security=security, shares=shares, date=date,
+                           price=price, commission=commission)
+            return redirect('/portfolio/account/' + account_id)
+    return render(request, 'portfolio/buy.html', {'form': form})

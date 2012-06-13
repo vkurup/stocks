@@ -7,12 +7,10 @@
 <h2>Portfolio: Buy Security</h2>
 <hr>
 
-<form method="post">
-  {% csrf_token %}
-  <p><label>Security:</label> <input type="text" name="security"></p>
-  <p><label>Shares:</label> <input type="number" step="0.01" name="shares"></p>
-  <p><label>Price:</label> <input type="number" step="0.01" name="price"></p>
-  <p><label>Commission:</label> <input type="number" step="0.01" name="commission"></p>
+<form method="post">{% csrf_token %}
+  <table>
+    {{ form.as_table }}
+  </table>
   <input type="submit" />
 </form>
 

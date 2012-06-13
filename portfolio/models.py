@@ -47,7 +47,7 @@ class Account(models.Model):
 
     def positions(self):
         positions = {'$CASH': self.new_position()}
-        txns = Transaction.objects.filter(account=self).order_by('date')
+        txns = Transaction.objects.filter(account=self).order_by('date','id')
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = self.new_position()
@@ -95,7 +95,7 @@ class Account(models.Model):
 class Transaction(models.Model):
     account = models.ForeignKey(Account)
     action = models.CharField(max_length=10)
-    date = models.DateTimeField('transaction date')
+    date = models.DateField('transaction date')
     security = models.CharField(max_length=10)
     shares = models.DecimalField(decimal_places=2, max_digits=10)
     price = models.DecimalField(decimal_places=2, max_digits=10)
