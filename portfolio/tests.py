@@ -7,6 +7,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 from models import Transaction, Account
+import datetime
 
 class TransactionFactory(factory.Factory):
     FACTORY_FOR = Transaction
@@ -204,3 +205,16 @@ class AccountTest(TestCase):
         positions = self.a.positions()
         gain = positions['AAPL']['gain']
         self.assertEquals(gain, -7)
+
+    def test_positions_includes_only_past_dates(self):
+        june = datetime.date(2011, 6, 1)
+        july = datetime.date(2011, 7, 1)
+        august = datetime.date(2011, 8, 1)
+        self.a.deposit(amount=10000, date=june)
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=20, date=june)
+        self.a.buy_security(security='AAPL', shares=200,
+                            price=20, date=august)
+        positions = self.a.positions(date=july)
+        aapl = positions['AAPL']['shares']
+        self.assertEquals(aapl, 100)

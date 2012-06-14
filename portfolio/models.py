@@ -1,5 +1,6 @@
 from django.db import models
 from decimal import Decimal
+from django.utils import timezone
 
 class Account(models.Model):
     name = models.CharField(max_length=50)
@@ -45,9 +46,15 @@ class Account(models.Model):
                     mktval=0, gain=0, dividends=0,
                     total_return=0)
 
-    def positions(self):
+    def positions(self, date=None):
+        """Return a dictionary of all of the positions in this account.
+
+        If date is provided, then only include transactions up to (and 
+        including) that date."""
+        if not date:
+            date = timezone.now()
         positions = {'$CASH': self.new_position()}
-        txns = Transaction.objects.filter(account=self).order_by('date','id')
+        txns = Transaction.objects.filter(account=self, date__lte=date).order_by('date','id')
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = self.new_position()
