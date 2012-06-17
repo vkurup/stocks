@@ -42,7 +42,7 @@ class Account(models.Model):
         self.receive_interest(-amount, date)
 
     def new_position(self):
-        return dict(shares=0, price=0, basis=0, 
+        return dict(shares=0, price=1, basis=0, 
                     mktval=0, gain=0, dividends=0,
                     total_return=0)
 
@@ -61,7 +61,11 @@ class Account(models.Model):
             if t.dividend_from and t.dividend_from not in positions:
                 positions[t.dividend_from] = self.new_position()
             if t.action == 'SELL':
-                old_basis_ps = positions[t.security]['basis'] / positions[t.security]['shares']
+                current_shares = positions[t.security]['shares']
+                if current_shares:
+                    old_basis_ps = positions[t.security]['basis'] / positions[t.security]['shares']
+                else:
+                    old_basis_ps = t.price
                 positions[t.security]['basis'] += old_basis_ps * t.shares
             else:
                 positions[t.security]['basis'] += t.shares * t.price + t.commission
