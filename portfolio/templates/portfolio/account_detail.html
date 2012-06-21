@@ -46,6 +46,16 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
   </tr>
   {% endif %}
 {% endfor %}
+  <tr>
+    <th>Total:</th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>{{ account.basis|floatformat:2|intcomma }}</td>
+    <td>{{ account.value|floatformat:2|intcomma }}</td>
+    <td>{{ account.gain|floatformat:2|intcomma }}</td>
+    <td>{{ account.dividends|floatformat:2|intcomma }}</td>
+    <td>{{ account.total_return|floatformat:2|intcomma }} %</td>
+  </tr>
 </table>
 
 {% endblock %}

@@ -105,27 +105,39 @@ class AccountTest(TestCase):
 
     def test_buy_security_check_security_value(self):
         self.a.buy_security(security='AAPL', shares=10, 
-                            price=29.45, date=timezone.now())
+                            price=29.45, commission=10,
+                            date=timezone.now())
         value = self.a.value(security='AAPL')
         self.assertEquals(value, 294.50)
 
     def test_buy_security_check_account_value(self):
         self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=10,
-                            price=15.00, date=timezone.now())
+                            price=15.00, commission=20,
+                            date=timezone.now())
         self.a.receive_interest(amount=10.00, date=timezone.now())
         value = self.a.value()
         cash = self.a.value(security='$CASH')
-        self.assertEquals(value, 10010.00)
-        self.assertEquals(cash, 9860.00)
+        self.assertEquals(value, 9990.00)
+        self.assertEquals(cash, 9840.00)
 
-    def test_security_plus_dividend_correct_return(self):
-        self.a.deposit(amount=1000.00, date=timezone.now())
+    def test_buy_security_check_security_basis(self):
+        self.a.buy_security(security='AAPL', shares=10, 
+                            price=29.45, commission=10,
+                            date=timezone.now())
+        basis = self.a.basis(security='AAPL')
+        self.assertEquals(basis, 304.50)
+
+    def test_buy_security_check_account_basis(self):
+        self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=10,
-                            price=15.00, date=timezone.now())
-        self.a.dividend(security='AAPL', amount=10.00, date=timezone.now())
-        tr = self.a.total_return(security='AAPL')
-        self.assertEquals(tr, 160.00)
+                            price=15.00, commission=20,
+                            date=timezone.now())
+        self.a.receive_interest(amount=10.00, date=timezone.now())
+        basis = self.a.basis()
+        cash = self.a.basis(security='$CASH')
+        self.assertEquals(basis, 10010.00)
+        self.assertEquals(cash, 9840.00)
 
     def test_deposit_sets_cash(self):
         self.a.deposit(amount=123.45, date=timezone.now())

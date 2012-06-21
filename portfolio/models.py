@@ -85,15 +85,32 @@ class Account(models.Model):
     def value(self, security=None):
         positions = self.positions()
         if security:
-            return positions[security]['shares'] * positions[security]['price']
-        else:
-            value = sum(positions[p]['shares'] * positions[p]['price'] for p in positions)
-            return value
+            return positions[security]['mktval']
+        return sum(positions[p]['mktval'] for p in positions)
+    
+    def basis(self, security=None):
+        positions = self.positions()
+        if security:
+            return positions[security]['basis']
+        return sum(positions[p]['basis'] for p in positions)
+
+    def gain(self, security=None):
+        positions = self.positions()
+        if security:
+            return positions[security]['gain']
+        return sum(positions[p]['gain'] for p in positions)
+    
+    def dividends(self, security=None):
+        positions = self.positions()
+        if security:
+            return positions[security]['dividends']
+        return sum(positions[p]['dividends'] for p in positions)
     
     def total_return(self, security=None):
-        value = self.value(security)
         positions = self.positions()
-        return value + positions[security]['dividends']
+        if security:
+            return positions[security]['total_return']
+        return ((self.value() + self.dividends()) / self.basis() - 1) * 100
 
     @property
     def cash(self):
