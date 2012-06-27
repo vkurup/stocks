@@ -67,6 +67,8 @@ class Account(models.Model):
                 else:
                     old_basis_ps = t.price
                 positions[t.security]['basis'] += old_basis_ps * t.shares
+            elif t.action == 'INT':
+                pass
             else:
                 positions[t.security]['basis'] += t.shares * t.price + t.commission
             positions[t.security]['shares'] += t.shares
@@ -76,8 +78,11 @@ class Account(models.Model):
             positions[t.security]['mktval'] = mktval
             positions[t.security]['gain'] = mktval - basis
             dividends = positions[t.security]['dividends']
-            positions[t.security]['total_return'] = ((mktval + dividends)/basis - 1) * 100
-
+            if basis:
+                positions[t.security]['total_return'] = ((mktval + dividends)/basis - 1) * 100
+            else:
+                positions[t.security]['total_return'] = 0
+                
             if t.action == 'DIV':
                 positions[t.dividend_from]['dividends'] += t.shares * t.price
         return positions

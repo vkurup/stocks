@@ -136,8 +136,8 @@ class AccountTest(TestCase):
         self.a.receive_interest(amount=10.00, date=timezone.now())
         basis = self.a.basis()
         cash = self.a.basis(security='$CASH')
-        self.assertEquals(basis, 10010.00)
-        self.assertEquals(cash, 9840.00)
+        self.assertEquals(basis, 10000.00)
+        self.assertEquals(cash, 9830.00)
 
     def test_deposit_sets_cash(self):
         self.a.deposit(amount=123.45, date=timezone.now())
@@ -230,3 +230,9 @@ class AccountTest(TestCase):
         positions = self.a.positions(date=july)
         aapl = positions['AAPL']['shares']
         self.assertEquals(aapl, 100)
+
+    def test_interest_doesnt_affect_basis(self):
+        self.a.receive_interest(amount=5.89, date=timezone.now())
+        basis = self.a.basis()
+        self.assertEquals(basis, 0)
+
