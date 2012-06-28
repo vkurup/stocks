@@ -198,13 +198,15 @@ class AccountTest(TestCase):
         self.assertEquals(market_value, 2000)
 
     def test_market_value_for_2_buys(self):
+        june = datetime.date(2011, 6, 1)
+        july = datetime.date(2011, 7, 1)
         self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=100,
                             commission=7.00,
-                            price=20.00, date=timezone.now())
+                            price=20.00, date=june)
         self.a.buy_security(security='AAPL', shares=10,
                             commission=5.00,
-                            price=23.00, date=timezone.now())
+                            price=23.00, date=july)
         positions = self.a.positions()
         market_value = positions['AAPL']['mktval']
         self.assertEquals(market_value, 2530)

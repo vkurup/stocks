@@ -17,6 +17,13 @@ class Account(models.Model):
         t.commission = Decimal(commission)
         t.save()
 
+        # update Price table
+        p = Price()
+        p.date = date
+        p.security = security
+        p.price = price
+        p.save()
+
         # other side of double-entry
         #FIXME for CASH
         if security != '$CASH':
@@ -72,12 +79,13 @@ class Account(models.Model):
             else:
                 positions[t.security]['basis'] += t.shares * t.price + t.commission
             positions[t.security]['shares'] += t.shares
-            positions[t.security]['price'] = t.price
             basis = positions[t.security]['basis']
-            mktval = positions[t.security]['shares'] * t.price
+            dividends = positions[t.security]['dividends']
+            latest_price = Price.objects.filter(security=t.security, date__lte=date).latest('date').price
+            positions[t.security]['price'] = latest_price
+            mktval = positions[t.security]['shares'] * latest_price
             positions[t.security]['mktval'] = mktval
             positions[t.security]['gain'] = mktval - basis
-            dividends = positions[t.security]['dividends']
             if basis:
                 positions[t.security]['total_return'] = ((mktval + dividends)/basis - 1) * 100
             else:
@@ -123,7 +131,10 @@ class Account(models.Model):
         return float(positions['$CASH']['shares'])
 
 
-
+class Price(models.Model):
+    date = models.DateField('transaction date')
+    security = models.CharField(max_length=10)
+    price = models.DecimalField(decimal_places=2, max_digits=10)    
 
 class Transaction(models.Model):
     account = models.ForeignKey(Account)
