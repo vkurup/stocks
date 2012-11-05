@@ -2,10 +2,12 @@ from django.db import models
 from decimal import Decimal
 from django.utils import timezone
 
+
 class Account(models.Model):
     name = models.CharField(max_length=50)
 
-    def buy_security(self, action="BUY", security=None, shares=None, date=None, price=None, dividend_from='', commission=0):
+    def buy_security(self, action="BUY", security=None, shares=None, date=None,
+                     price=None, dividend_from='', commission=0):
         t = Transaction()
         t.account = self
         t.action = action
@@ -28,22 +30,44 @@ class Account(models.Model):
         #FIXME for CASH
         if security != '$CASH':
             cost = t.shares * t.price + t.commission
-            self.sell_security(security = '$CASH', shares = cost, date=date, price=1.00)
+            self.sell_security(security='$CASH',
+                               shares=cost,
+                               date=date,
+                               price=1.00)
 
-    def sell_security(self, security=None, shares=None, date=None, price=None, commission=0):
-        self.buy_security(action="SELL", security=security, shares=-shares, date=date, price=price, commission=commission)
+    def sell_security(self, security=None, shares=None, date=None,
+                      price=None, commission=0):
+        self.buy_security(action="SELL",
+                          security=security,
+                          shares=-shares,
+                          date=date,
+                          price=price,
+                          commission=commission)
 
     def dividend(self, security=None, amount=0.00, date=None):
-        self.buy_security(action="DIV", security='$CASH', dividend_from=security, shares=amount, date=date, price=1.00)
+        self.buy_security(action="DIV",
+                          security='$CASH',
+                          dividend_from=security,
+                          shares=amount,
+                          date=date,
+                          price=1.00)
 
     def deposit(self, amount=0, date=None):
-        self.buy_security(action="DEPOSIT", security='$CASH', shares=amount, date=date, price=1.00)
+        self.buy_security(action="DEPOSIT",
+                          security='$CASH',
+                          shares=amount,
+                          date=date,
+                          price=1.00)
 
     def withdraw(self, amount=0, date=None):
-        self.deposit(amount = -amount, date=date)
+        self.deposit(amount=-amount, date=date)
 
     def receive_interest(self, amount=0, date=None):
-        self.buy_security(action="INT", security='$CASH', shares=amount, date=date, price=1.00)
+        self.buy_security(action="INT",
+                          security='$CASH',
+                          shares=amount,
+                          date=date,
+                          price=1.00)
 
     def pay_interest(self, amount=0, date=None):
         self.receive_interest(-amount, date)
@@ -61,7 +85,8 @@ class Account(models.Model):
         if not date:
             date = timezone.now()
         positions = {'$CASH': self.new_position()}
-        txns = Transaction.objects.filter(account=self, date__lte=date).order_by('date','id')
+        txns = Transaction.objects.filter(
+            account=self, date__lte=date).order_by('date', 'id')
         for t in txns:
             if t.security not in positions:
                 positions[t.security] = self.new_position()
@@ -70,24 +95,28 @@ class Account(models.Model):
             if t.action == 'SELL':
                 current_shares = positions[t.security]['shares']
                 if current_shares:
-                    old_basis_ps = positions[t.security]['basis'] / positions[t.security]['shares']
+                    old_basis_ps = (positions[t.security]['basis'] /
+                                    positions[t.security]['shares'])
                 else:
                     old_basis_ps = t.price
                 positions[t.security]['basis'] += old_basis_ps * t.shares
             elif t.action == 'INT':
                 pass
             else:
-                positions[t.security]['basis'] += t.shares * t.price + t.commission
+                positions[t.security]['basis'] += (t.shares *
+                                                   t.price) + t.commission
             positions[t.security]['shares'] += t.shares
             basis = positions[t.security]['basis']
             dividends = positions[t.security]['dividends']
-            latest_price = Price.objects.filter(security=t.security, date__lte=date).latest('date').price
+            latest_price = Price.objects.filter(
+                security=t.security, date__lte=date).latest('date').price
             positions[t.security]['price'] = latest_price
             mktval = positions[t.security]['shares'] * latest_price
             positions[t.security]['mktval'] = mktval
             positions[t.security]['gain'] = mktval - basis
             if basis:
-                positions[t.security]['total_return'] = ((mktval + dividends)/basis - 1) * 100
+                positions[t.security]['total_return'] = \
+                    ((mktval + dividends) / basis - 1) * 100
             else:
                 positions[t.security]['total_return'] = 0
 
@@ -136,6 +165,7 @@ class Price(models.Model):
     date = models.DateField('transaction date')
     security = models.CharField(max_length=10)
     price = models.DecimalField(decimal_places=2, max_digits=10)
+
 
 class Transaction(models.Model):
     account = models.ForeignKey(Account)
