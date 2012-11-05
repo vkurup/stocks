@@ -9,6 +9,7 @@ from django.utils import timezone
 from models import Transaction, Account
 import datetime
 
+
 class TransactionFactory(factory.Factory):
     FACTORY_FOR = Transaction
 
@@ -35,7 +36,7 @@ class TransactionTest(TestCase):
         txn.price = 21.32
         txn.save()
 
-        edited_txn = Transaction.objects.get(pk = txn.pk)
+        edited_txn = Transaction.objects.get(pk=txn.pk)
 
         self.assertEquals(float(edited_txn.price), 21.32)
 
@@ -43,8 +44,9 @@ class TransactionTest(TestCase):
         TransactionFactory()
         txn = Transaction.objects.all()[0]
         txn.delete()
-        txn = Transaction.objects.filter(pk = txn.pk)
+        txn = Transaction.objects.filter(pk=txn.pk)
         self.assertTrue(len(txn) == 0)
+
 
 class AccountTest(TestCase):
 
@@ -56,20 +58,25 @@ class AccountTest(TestCase):
         self.assertTrue(self.a)
 
     def test_buy_security(self):
-        self.a.buy_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=29.27, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], 100)
 
     def test_buy_more_security(self):
-        self.a.buy_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
-        self.a.buy_security(security='AAPL', shares=50, price=29.45, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=29.27, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=50,
+                            price=29.45, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], 150)
 
     def test_sell_security(self):
         self.a.deposit(amount=10000, date=timezone.now())
-        self.a.buy_security(security='AAPL', shares=100, price=29.27, date=timezone.now())
-        self.a.sell_security(security='AAPL', shares=99, price=29.27, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=29.27, date=timezone.now())
+        self.a.sell_security(security='AAPL', shares=99,
+                             price=29.27, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], 1)
 
@@ -99,12 +106,13 @@ class AccountTest(TestCase):
         self.assertEquals(positions['$CASH']['shares'], Decimal('-20'))
 
     def test_buy_security_uses_cash(self):
-        self.a.buy_security(security='AAPL', shares=10, price=29.45, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=10,
+                            price=29.45, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['$CASH']['shares'], Decimal('-294.50'))
 
     def test_buy_security_check_security_value(self):
-        self.a.buy_security(security='AAPL', shares=10, 
+        self.a.buy_security(security='AAPL', shares=10,
                             price=29.45, commission=10,
                             date=timezone.now())
         value = self.a.value(security='AAPL')
@@ -122,7 +130,7 @@ class AccountTest(TestCase):
         self.assertEquals(cash, 9840.00)
 
     def test_buy_security_check_security_basis(self):
-        self.a.buy_security(security='AAPL', shares=10, 
+        self.a.buy_security(security='AAPL', shares=10,
                             price=29.45, commission=10,
                             date=timezone.now())
         basis = self.a.basis(security='AAPL')
@@ -161,7 +169,7 @@ class AccountTest(TestCase):
 
     def test_cost_basis_includes_commission(self):
         self.a.buy_security(security='AAPL', shares=100,
-                            price=20.00, commission=7.00, 
+                            price=20.00, commission=7.00,
                             date=timezone.now())
         positions = self.a.positions()
         cost_basis = positions['AAPL']['basis']
@@ -169,10 +177,10 @@ class AccountTest(TestCase):
 
     def test_cost_basis_multiple_buys(self):
         self.a.buy_security(security='AAPL', shares=100,
-                            price=8.00, commission=3.00, 
+                            price=8.00, commission=3.00,
                             date=timezone.now())
         self.a.buy_security(security='AAPL', shares=200,
-                            price=6.00, commission=4.00, 
+                            price=6.00, commission=4.00,
                             date=timezone.now())
         positions = self.a.positions()
         cost_basis = positions['AAPL']['basis']
@@ -180,9 +188,9 @@ class AccountTest(TestCase):
 
     def test_cost_basis_after_sell(self):
         self.a.buy_security(security='AAPL', shares=100,
-                            price=20.00, commission=0, 
+                            price=20.00, commission=0,
                             date=timezone.now())
-        self.a.sell_security(security='AAPL', shares=50, 
+        self.a.sell_security(security='AAPL', shares=50,
                              price=30, date=timezone.now())
         positions = self.a.positions()
         cost_basis = positions['AAPL']['basis']
@@ -210,7 +218,7 @@ class AccountTest(TestCase):
         positions = self.a.positions()
         market_value = positions['AAPL']['mktval']
         self.assertEquals(market_value, 2530)
-        
+
     def test_gain_is_correct(self):
         self.a.deposit(amount=10000, date=timezone.now())
         self.a.buy_security(security='AAPL', shares=100,
@@ -237,4 +245,3 @@ class AccountTest(TestCase):
         self.a.receive_interest(amount=5.89, date=timezone.now())
         basis = self.a.basis()
         self.assertEquals(basis, 0)
-
