@@ -49,14 +49,14 @@ class Account(models.Model):
         self.receive_interest(-amount, date)
 
     def new_position(self):
-        return dict(shares=0, price=1, basis=0, 
+        return dict(shares=0, price=1, basis=0,
                     mktval=0, gain=0, dividends=0,
                     total_return=0)
 
     def positions(self, date=None):
         """Return a dictionary of all of the positions in this account.
 
-        If date is provided, then only include transactions up to (and 
+        If date is provided, then only include transactions up to (and
         including) that date."""
         if not date:
             date = timezone.now()
@@ -90,7 +90,7 @@ class Account(models.Model):
                 positions[t.security]['total_return'] = ((mktval + dividends)/basis - 1) * 100
             else:
                 positions[t.security]['total_return'] = 0
-                
+
             if t.action == 'DIV':
                 positions[t.dividend_from]['dividends'] += t.shares * t.price
         return positions
@@ -100,7 +100,7 @@ class Account(models.Model):
         if security:
             return positions[security]['mktval']
         return sum(positions[p]['mktval'] for p in positions)
-    
+
     def basis(self, security=None):
         positions = self.positions()
         if security:
@@ -112,18 +112,19 @@ class Account(models.Model):
         if security:
             return positions[security]['gain']
         return sum(positions[p]['gain'] for p in positions)
-    
+
     def dividends(self, security=None):
         positions = self.positions()
         if security:
             return positions[security]['dividends']
         return sum(positions[p]['dividends'] for p in positions)
-    
+
     def total_return(self, security=None):
         positions = self.positions()
         if security:
             return positions[security]['total_return']
-        return ((self.value() + self.dividends()) / self.basis() - 1) * 100
+        if self.basis():
+            return ((self.value() + self.dividends()) / self.basis() - 1) * 100
 
     @property
     def cash(self):
@@ -134,7 +135,7 @@ class Account(models.Model):
 class Price(models.Model):
     date = models.DateField('transaction date')
     security = models.CharField(max_length=10)
-    price = models.DecimalField(decimal_places=2, max_digits=10)    
+    price = models.DecimalField(decimal_places=2, max_digits=10)
 
 class Transaction(models.Model):
     account = models.ForeignKey(Account)
@@ -148,4 +149,3 @@ class Transaction(models.Model):
 
     def __unicode__(self):
         return self.action + ' ' + str(self.shares) + ' ' + self.security
-
