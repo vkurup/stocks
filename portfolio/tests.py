@@ -57,9 +57,21 @@ class AccountTest(TestCase):
     def test_create_account(self):
         self.assertTrue(self.a)
 
+    def test_deposit(self):
+        self.a.deposit(amount=1000.12, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12'))
+
+    def test_withdraw(self):
+        self.a.withdraw(amount=10, date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['$CASH']['shares'], Decimal('-10'))
+
     def test_buy_security(self):
-        self.a.buy_security(security='AAPL', shares=100,
-                            price=29.27, date=timezone.now())
+        self.a.buy_security(security='AAPL',
+                            shares=100,
+                            price=29.27,
+                            date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], 100)
 
@@ -81,29 +93,24 @@ class AccountTest(TestCase):
         self.assertEquals(positions['AAPL']['shares'], 1)
 
     def test_dividend(self):
+        self.a.deposit(amount=1000, date=timezone.now())
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=10.00, date=timezone.now())
         self.a.dividend(security='AAPL', amount=10.00, date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['$CASH']['shares'], 10.00)
 
-    def test_deposit(self):
-        self.a.deposit(amount=1000.12, date=timezone.now())
-        positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('1000.12'))
-
-    def test_withdraw(self):
-        self.a.withdraw(amount=10, date=timezone.now())
-        positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('-10'))
-
     def test_receive_interest(self):
+        self.a.deposit(amount=100, date=timezone.now())
         self.a.receive_interest(amount=5.89, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('5.89'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('105.89'))
 
     def test_pay_interest(self):
-        self.a.pay_interest(amount=20, date=timezone.now())
+        self.a.withdraw(amount=100, date=timezone.now())
+        self.a.pay_interest(amount=5.89, date=timezone.now())
         positions = self.a.positions()
-        self.assertEquals(positions['$CASH']['shares'], Decimal('-20'))
+        self.assertEquals(positions['$CASH']['shares'], Decimal('-105.89'))
 
     def test_buy_security_uses_cash(self):
         self.a.buy_security(security='AAPL', shares=10,
@@ -242,6 +249,7 @@ class AccountTest(TestCase):
         self.assertEquals(aapl, 100)
 
     def test_interest_doesnt_affect_basis(self):
+        self.a.deposit(amount=100, date=timezone.now())
         self.a.receive_interest(amount=5.89, date=timezone.now())
         basis = self.a.basis()
-        self.assertEquals(basis, 0)
+        self.assertEquals(basis, 100)

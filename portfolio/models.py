@@ -6,76 +6,99 @@ from django.utils import timezone
 class Account(models.Model):
     name = models.CharField(max_length=50)
 
-    def buy_security(self, action="BUY", security=None, shares=None, date=None,
-                     price=None, dividend_from='', commission=0):
+    def buy_security(self, security=None, shares=None, date=None,
+                     price=None, commission=0):
         t = Transaction()
         t.account = self
-        t.action = action
+        t.action = 'BUY'
         t.security = security
         t.shares = Decimal(shares)
         t.date = date
         t.price = Decimal(price)
-        t.dividend_from = dividend_from
         t.commission = Decimal(commission)
         t.save()
 
-        # update Price table
-        p = Price()
-        p.date = date
-        p.security = security
-        p.price = price
-        p.save()
-
-        # other side of double-entry
-        #FIXME for CASH
-        if security != '$CASH':
-            cost = t.shares * t.price + t.commission
-            self.sell_security(security='$CASH',
-                               shares=cost,
-                               date=date,
-                               price=1.00)
+        Price.objects.create(date=date, security=security,
+                             price=price)
 
     def sell_security(self, security=None, shares=None, date=None,
-                      price=None, commission=0):
-        self.buy_security(action="SELL",
-                          security=security,
-                          shares=-shares,
-                          date=date,
-                          price=price,
-                          commission=commission)
+                      price=None, commission=0, sec_fee=0):
+        t = Transaction()
+        t.account = self
+        t.action = 'SELL'
+        t.security = security
+        t.shares = Decimal(shares)
+        t.date = date
+        t.price = Decimal(price)
+        t.commission = Decimal(commission)
+        t.sec_fee = Decimal(sec_fee)
+        t.save()
+
+        Price.objects.create(date=date, security=security,
+                             price=price)
 
     def dividend(self, security=None, amount=0.00, date=None):
-        self.buy_security(action="DIV",
-                          security='$CASH',
-                          dividend_from=security,
-                          shares=amount,
-                          date=date,
-                          price=1.00)
+        t = Transaction()
+        t.account = self
+        t.action = 'DIV'
+        t.security = security
+        t.date = date
+        t.cash_amount = Decimal(amount)
+        t.save()
 
     def deposit(self, amount=0, date=None):
-        self.buy_security(action="DEPOSIT",
-                          security='$CASH',
-                          shares=amount,
-                          date=date,
-                          price=1.00)
+        t = Transaction()
+        t.account = self
+        t.action = 'DEP'
+        t.cash_amount = Decimal(amount)
+        t.date = date
+        t.save()
 
     def withdraw(self, amount=0, date=None):
-        self.deposit(amount=-amount, date=date)
+        t = Transaction()
+        t.account = self
+        t.action = 'WITH'
+        t.cash_amount = Decimal(-amount)
+        t.date = date
+        t.save()
 
     def receive_interest(self, amount=0, date=None):
-        self.buy_security(action="INT",
-                          security='$CASH',
-                          shares=amount,
-                          date=date,
-                          price=1.00)
+        t = Transaction()
+        t.account = self
+        t.action = 'INT'
+        t.cash_amount = Decimal(amount)
+        t.date = date
+        t.save()
 
     def pay_interest(self, amount=0, date=None):
-        self.receive_interest(-amount, date)
+        t = Transaction()
+        t.account = self
+        t.action = 'MARGIN'
+        t.cash_amount = Decimal(-amount)
+        t.date = date
+        t.save()
 
     def new_position(self):
         return dict(shares=0, price=1, basis=0,
                     mktval=0, gain=0, dividends=0,
                     total_return=0)
+
+    def update_market_value(self, positions, date):
+        for security in positions:
+            p = positions[security]
+            if security == '$CASH':
+                price = 1.00
+            else:
+                price = Price.objects.filter(
+                    security=security, date__lte=date).latest('date').price
+            mktval = p['shares'] * Decimal(price)
+            gain = mktval - p['basis']
+            total_return = ((mktval + p['dividends']) / p['basis'] - 1) * 100
+            positions[security]['mktval'] = mktval
+            positions[security]['gain'] = gain
+            positions[security]['total_return'] = total_return
+            positions[security]['price'] = price
+        return positions
 
     def positions(self, date=None):
         """Return a dictionary of all of the positions in this account.
@@ -88,41 +111,36 @@ class Account(models.Model):
         txns = Transaction.objects.filter(
             account=self, date__lte=date).order_by('date', 'id')
         for t in txns:
-            if t.security not in positions:
+            if t.security and t.security not in positions:
                 positions[t.security] = self.new_position()
-            if t.dividend_from and t.dividend_from not in positions:
-                positions[t.dividend_from] = self.new_position()
-            if t.action == 'SELL':
+
+            # switch based on transaction action
+            if t.action in ('DEP', 'WITH'):
+                positions['$CASH']['basis'] += t.cash_amount
+                positions['$CASH']['shares'] += t.cash_amount
+            elif t.action in ('INT', 'MARGIN'):
+                positions['$CASH']['shares'] += t.cash_amount
+            elif t.action == 'DIV':
+                positions['$CASH']['basis'] += t.cash_amount
+                positions['$CASH']['shares'] += t.cash_amount
+                positions[t.security]['dividends'] += t.cash_amount
+            elif t.action == 'BUY':
+                positions[t.security]['basis'] += (
+                    t.shares * t.price + t.commission)
+                positions[t.security]['shares'] += t.shares
+                cost = t.shares * t.price + t.commission
+                positions['$CASH']['basis'] -= cost
+                positions['$CASH']['shares'] -= cost
+            elif t.action == 'SELL':
                 current_shares = positions[t.security]['shares']
                 if current_shares:
                     old_basis_ps = (positions[t.security]['basis'] /
                                     positions[t.security]['shares'])
                 else:
                     old_basis_ps = t.price
-                positions[t.security]['basis'] += old_basis_ps * t.shares
-            elif t.action == 'INT':
-                pass
-            else:
-                positions[t.security]['basis'] += (t.shares *
-                                                   t.price) + t.commission
-            positions[t.security]['shares'] += t.shares
-            basis = positions[t.security]['basis']
-            dividends = positions[t.security]['dividends']
-            latest_price = Price.objects.filter(
-                security=t.security, date__lte=date).latest('date').price
-            positions[t.security]['price'] = latest_price
-            mktval = positions[t.security]['shares'] * latest_price
-            positions[t.security]['mktval'] = mktval
-            positions[t.security]['gain'] = mktval - basis
-            if basis:
-                positions[t.security]['total_return'] = \
-                    ((mktval + dividends) / basis - 1) * 100
-            else:
-                positions[t.security]['total_return'] = 0
-
-            if t.action == 'DIV':
-                positions[t.dividend_from]['dividends'] += t.shares * t.price
-        return positions
+                positions[t.security]['basis'] -= old_basis_ps * t.shares
+                positions[t.security]['shares'] -= t.shares
+        return self.update_market_value(positions, date)
 
     def value(self, security=None):
         positions = self.positions()
@@ -171,11 +189,16 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account)
     action = models.CharField(max_length=10)
     date = models.DateField('transaction date')
-    security = models.CharField(max_length=10)
-    shares = models.DecimalField(decimal_places=2, max_digits=10)
-    price = models.DecimalField(decimal_places=2, max_digits=10)
-    commission = models.DecimalField(decimal_places=2, max_digits=10)
-    dividend_from = models.CharField(max_length=10, blank=True)
+    security = models.CharField(max_length=10, blank=True)
+    shares = models.DecimalField(decimal_places=2, max_digits=10, null=True)
+    price = models.DecimalField(decimal_places=2, max_digits=10, null=True)
+    commission = models.DecimalField(decimal_places=2, max_digits=10,
+                                     null=True)
+    cash_amount = models.DecimalField(decimal_places=2, max_digits=10,
+                                      null=True)
+    sec_fee = models.DecimalField(decimal_places=2, max_digits=10, null=True)
+    split_ratio = models.DecimalField(decimal_places=2, max_digits=5,
+                                      null=True)
 
     def __unicode__(self):
         return self.action + ' ' + str(self.shares) + ' ' + self.security
