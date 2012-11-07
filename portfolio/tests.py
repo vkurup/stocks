@@ -253,3 +253,11 @@ class AccountTest(TestCase):
         self.a.receive_interest(amount=5.89, date=timezone.now())
         basis = self.a.basis()
         self.assertEquals(basis, 100)
+
+    def test_stock_split_adjusts_shares(self):
+        self.a.buy_security(security='AAPL', shares=100,
+                            price=20.00, date=timezone.now())
+        self.a.stock_split(security='AAPL', split_ratio=2.0,
+                           date=timezone.now())
+        positions = self.a.positions()
+        self.assertEquals(positions['AAPL']['shares'], 200)

@@ -78,6 +78,15 @@ class Account(models.Model):
         t.date = date
         t.save()
 
+    def stock_split(self, security=None, split_ratio=0, date=None):
+        t = Transaction()
+        t.account = self
+        t.action = 'SS'
+        t.security = security
+        t.split_ratio = split_ratio
+        t.date = date
+        t.save()
+
     def new_position(self):
         return dict(shares=0, price=1, basis=0,
                     mktval=0, gain=0, dividends=0,
@@ -124,6 +133,8 @@ class Account(models.Model):
                 positions['$CASH']['basis'] += t.cash_amount
                 positions['$CASH']['shares'] += t.cash_amount
                 positions[t.security]['dividends'] += t.cash_amount
+            elif t.action == 'SS':
+                positions[t.security]['shares'] *= t.split_ratio
             elif t.action == 'BUY':
                 positions[t.security]['basis'] += (
                     t.shares * t.price + t.commission)
