@@ -261,3 +261,7 @@ class AccountTest(TestCase):
                            date=timezone.now())
         positions = self.a.positions()
         self.assertEquals(positions['AAPL']['shares'], 200)
+
+    def test_no_error_if_no_basis(self):
+        cash = self.a.cash
+        self.assertEquals(cash, 0)
