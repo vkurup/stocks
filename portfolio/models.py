@@ -102,10 +102,13 @@ class Account(models.Model):
                     security=security, date__lte=date).latest('date').price
             mktval = p['shares'] * Decimal(price)
             gain = mktval - p['basis']
-            total_return = ((mktval + p['dividends']) / p['basis'] - 1) * 100
+            if p['basis']:
+                tr = ((mktval + p['dividends']) / p['basis'] - 1) * 100
+            else:
+                tr = 0
             positions[security]['mktval'] = mktval
             positions[security]['gain'] = gain
-            positions[security]['total_return'] = total_return
+            positions[security]['total_return'] = tr
             positions[security]['price'] = price
         return positions
 
