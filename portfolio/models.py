@@ -156,7 +156,7 @@ class Account(models.Model):
                 positions[t.security]['shares'] -= t.shares
         return self.update_market_value(positions, date)
 
-    def value(self, security=None):
+    def mktval(self, security=None):
         positions = self.positions()
         if security:
             return positions[security]['mktval']
@@ -185,7 +185,7 @@ class Account(models.Model):
         if security:
             return positions[security]['total_return']
         if self.basis():
-            return ((self.value() + self.dividends()) / self.basis() - 1) * 100
+            return ((self.mktval() + self.dividends()) / self.basis() - 1) * 100
 
     @property
     def cash(self):

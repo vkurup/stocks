@@ -122,7 +122,7 @@ class AccountTest(TestCase):
         self.a.buy_security(security='AAPL', shares=10,
                             price=29.45, commission=10,
                             date=timezone.now())
-        value = self.a.value(security='AAPL')
+        value = self.a.mktval(security='AAPL')
         self.assertEquals(value, 294.50)
 
     def test_buy_security_check_account_value(self):
@@ -131,8 +131,8 @@ class AccountTest(TestCase):
                             price=15.00, commission=20,
                             date=timezone.now())
         self.a.receive_interest(amount=10.00, date=timezone.now())
-        value = self.a.value()
-        cash = self.a.value(security='$CASH')
+        value = self.a.mktval()
+        cash = self.a.mktval(security='$CASH')
         self.assertEquals(value, 9990.00)
         self.assertEquals(cash, 9840.00)
 
