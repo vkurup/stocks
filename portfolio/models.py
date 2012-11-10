@@ -190,7 +190,7 @@ class Account(models.Model):
     @property
     def cash(self):
         positions = self.positions()
-        return float(positions['$CASH']['shares'])
+        return positions['$CASH']
 
 
 class Price(models.Model):

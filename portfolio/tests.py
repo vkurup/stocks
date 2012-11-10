@@ -156,16 +156,16 @@ class AccountTest(TestCase):
 
     def test_deposit_sets_cash(self):
         self.a.deposit(amount=123.45, date=timezone.now())
-        cash = self.a.cash
-        self.assertEquals(cash, 123.45)
+        cash = self.a.cash['shares']
+        self.assertEquals(cash, Decimal('123.45'))
 
     def test_account_transactions_are_separate(self):
         self.a.deposit(amount=5, date=timezone.now())
         b = Account()
         b.save()
         b.deposit(amount=10, date=timezone.now())
-        self.assertEquals(self.a.cash, 5)
-        self.assertEquals(b.cash, 10)
+        self.assertEquals(self.a.cash['shares'], 5)
+        self.assertEquals(b.cash['shares'], 10)
 
     def test_cost_basis_is_correct(self):
         self.a.buy_security(security='AAPL', shares=100,
@@ -263,5 +263,5 @@ class AccountTest(TestCase):
         self.assertEquals(positions['AAPL']['shares'], 200)
 
     def test_no_error_if_no_basis(self):
-        cash = self.a.cash
+        cash = self.a.cash['shares']
         self.assertEquals(cash, 0)

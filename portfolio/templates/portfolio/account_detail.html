@@ -10,11 +10,9 @@
 
 <h3>{{ account.name }}</h3>
 
-Cash: ${{ account.cash|floatformat:2|intcomma }}
-
 <ul>
   <li><a href="deposit">Deposit Cash</a></li>
-  {% if account.cash > 0 %}
+  {% if account.cash.shares > 0 %}
   <li><a href="buy">Buy Security</a></li>
   <li><a href="interest">Receive Interest Payment</a></li>
   {% endif %}
@@ -46,6 +44,16 @@ Cash: ${{ account.cash|floatformat:2|intcomma }}
   </tr>
   {% endif %}
 {% endfor %}
+  <tr>
+    <th>Cash:</th>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>{{ account.cash.basis|floatformat:2|intcomma }}</td>
+    <td>{{ account.cash.value|floatformat:2|intcomma }}</td>
+    <td>{{ account.cash.gain|floatformat:2|intcomma }}</td>
+    <td>&nbsp;</td>
+    <td>{{ account.cash.total_return|floatformat:2|intcomma }} %</td>
+  </tr>
   <tr>
     <th>Total:</th>
     <td>&nbsp;</td>
